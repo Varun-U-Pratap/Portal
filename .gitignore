@@ -1,0 +1,19 @@
+# Ignore environment configuration
+api/env.ini
+
+# Ignore database tools
+database/backup/
+
+# Mac system files
+.DS_Store
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.suo
+*.sln
+*.user
+
+# Composer and node modules (if added later)
+vendor/
+node_modules/

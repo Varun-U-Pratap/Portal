@@ -1,0 +1,306 @@
+/* ============================================================
+   Resurgence Portal – Custom Styles
+   Tailwind handles utilities; this file adds:
+   • Custom animations & transitions
+   • Step indicator styles
+   • Subject card interactions
+   • Skeleton loaders
+   • Success confetti burst
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ── Root Variables ──────────────────────────────────────────── */
+:root {
+  --blue:    #2563EB;
+  --blue-lt: #EFF6FF;
+  --green:   #10B981;
+  --green-lt:#ECFDF5;
+  --slate:   #F1F5F9;
+  --text:    #0F172A;
+  --muted:   #64748B;
+  --border:  #E2E8F0;
+  --radius:  12px;
+  --shadow:  0 4px 24px rgba(37,99,235,.10);
+}
+
+/* ── Base ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: #FFFFFF;
+  color: var(--text);
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* ── Hero Gradient Band ──────────────────────────────────────── */
+.hero-band {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 60%, #1E40AF 100%);
+}
+
+/* ── Progress Bar ────────────────────────────────────────────── */
+#progress-bar {
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Step Indicator ──────────────────────────────────────────── */
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s;
+  border: 2px solid var(--border);
+  background: #fff;
+  color: var(--muted);
+}
+.step-dot.active {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 5px rgba(37,99,235,.20);
+}
+.step-dot.done {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+/* ── Step connector line ─────────────────────────────────────── */
+.step-line {
+  height: 2px;
+  flex: 1;
+  background: var(--border);
+  transition: background 0.4s;
+  margin: 0 6px;
+}
+.step-line.done { background: var(--green); }
+
+/* ── Wizard Panels ───────────────────────────────────────────── */
+.wizard-panel {
+  display: none;
+  animation: fadeSlideIn 0.4s ease forwards;
+}
+.wizard-panel.active { display: block; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Form Inputs ─────────────────────────────────────────────── */
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+}
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* ── Subject Cards ───────────────────────────────────────────── */
+.subject-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s, background 0.2s;
+  position: relative;
+  user-select: none;
+}
+.subject-card:hover {
+  border-color: var(--blue);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+.subject-card.selected {
+  border-color: var(--blue);
+  background: var(--blue-lt);
+}
+.subject-card .check-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+.subject-card.selected .check-icon {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+/* ── Skeleton Loader ─────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--slate) 25%, #e2e8f0 50%, var(--slate) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 13px 28px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  letter-spacing: .2px;
+}
+.btn-primary:hover  { background: #1D4ED8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.30); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { background: #94A3B8; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-secondary {
+  background: #fff;
+  color: var(--blue);
+  border: 1.5px solid var(--blue);
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-secondary:hover { background: var(--blue-lt); transform: translateY(-1px); }
+
+/* ── Badge ───────────────────────────────────────────────────── */
+.selection-badge {
+  background: var(--blue);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 0.3s, transform 0.2s;
+  display: inline-block;
+}
+.selection-badge.has-items { background: var(--green); }
+.selection-badge.bump { animation: bumpPop 0.25s ease; }
+@keyframes bumpPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* ── Summary Card ────────────────────────────────────────────── */
+.summary-card {
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(15,23,42,.08);
+}
+.summary-pill {
+  background: var(--blue-lt);
+  color: var(--blue);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Success Screen ──────────────────────────────────────────── */
+#success-burst {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+.success-icon-ring {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: var(--green-lt);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  animation: scaleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes scaleIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── Error Shake ─────────────────────────────────────────────── */
+.shake { animation: shake 0.4s ease; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-6px); }
+  40%,80% { transform: translateX(6px); }
+}
+
+/* ── Tooltip / credits badge ─────────────────────────────────── */
+.credit-badge {
+  background: var(--slate);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── Responsive helpers ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .step-label { display: none; }
+}
