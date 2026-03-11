@@ -21,6 +21,7 @@ define('DB_NAME', $env['DB_NAME'] ?? 'resurgence');
 define('DB_USER', $env['DB_USER'] ?? 'root');
 define('DB_PASS', $env['DB_PASS'] ?? '');
 define('DB_CHARSET', $env['DB_CHARSET'] ?? 'utf8mb4');
+define('ALLOWED_ORIGIN', $env['ALLOWED_ORIGIN'] ?? '');
 
 /**
  * Returns a PDO instance with secure defaults.
@@ -42,8 +43,8 @@ function getDB(): PDO {
         } catch (PDOException $e) {
             http_response_code(500);
             header('Content-Type: application/json');
-            // echo json_encode(['error' => 'Database connection failed.']);
-            echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
+            error_log('Database connection failed: ' . $e->getMessage());
+            echo json_encode(['error' => 'Database connection failed.']);
             exit;
         }
     }
@@ -54,7 +55,9 @@ function getDB(): PDO {
 function jsonResponse(mixed $data, int $statusCode = 200): void {
     http_response_code($statusCode);
     header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
+    if (ALLOWED_ORIGIN) {
+        header('Access-Control-Allow-Origin: ' . ALLOWED_ORIGIN);
+    }
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
 }
