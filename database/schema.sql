@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS subjects (
     subject_code VARCHAR(20)  NOT NULL,
     subject_name VARCHAR(200) NOT NULL,
     dept_id      INT          UNSIGNED NOT NULL,
+    semester     TINYINT      UNSIGNED NOT NULL CHECK (semester BETWEEN 1 AND 8),
     credits      TINYINT      UNSIGNED NOT NULL DEFAULT 3,
     PRIMARY KEY (subject_code),
     FOREIGN KEY (dept_id) REFERENCES departments(id) ON DELETE RESTRICT ON UPDATE CASCADE

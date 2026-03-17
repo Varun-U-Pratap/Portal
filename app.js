@@ -179,16 +179,16 @@ async function loadDepartments() {
 // ══════════════════════════════════════════════════════════════
 // FETCH: SUBJECTS (called when entering step 2)
 // ══════════════════════════════════════════════════════════════
-async function loadSubjects(deptId) {
+async function loadSubjects(deptId, semester) {
     // Show skeleton loaders
     els.subjectsGrid.innerHTML = Array(4).fill(0).map(() => `
     <div class="skeleton h-24 w-full rounded-xl"></div>
   `).join('');
 
-    els.deptSubtitle.textContent = `Showing subjects for ${state.deptName}`;
+    els.deptSubtitle.textContent = `Showing Semester ${semester} subjects for ${state.deptName}`;
 
     try {
-        const res = await fetch(`api/subjects.php?dept_id=${encodeURIComponent(deptId)}`);
+        const res = await fetch(`api/subjects.php?dept_id=${encodeURIComponent(deptId)}&semester=${encodeURIComponent(semester)}`);
         const data = await res.json();
 
         state.allSubjects = data;
@@ -450,12 +450,27 @@ els.btnToStep2.addEventListener('click', async () => {
     if (!validateStep1()) return;
 
     goToStep(2);
-    // Only fetch subjects if department changed or not yet loaded for this dept
-    if (!state.allSubjects.length || state._lastDeptId !== state.deptId) {
+    // Only fetch subjects if department/semester/usn changed or not yet loaded
+    if (!state.allSubjects.length || state._lastDeptId !== state.deptId || state._lastSemester !== state.semester || state._lastUsn !== state.usn) {
         state._lastDeptId = state.deptId;
+        state._lastSemester = state.semester;
+        state._lastUsn = state.usn;
         state.selectedSubjects.clear();
+        
+        try {
+            const regRes = await fetch(`api/student_registrations.php?usn=${encodeURIComponent(state.usn)}`);
+            if (regRes.ok) {
+                const regData = await regRes.json();
+                if (regData.registered_subjects) {
+                    regData.registered_subjects.forEach(code => state.selectedSubjects.add(code));
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load previous registrations', e);
+        }
+        
         updateBadge();
-        await loadSubjects(state.deptId);
+        await loadSubjects(state.deptId, state.semester);
     }
 });
 
