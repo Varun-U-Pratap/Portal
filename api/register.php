@@ -60,9 +60,11 @@ try {
         $studentId = (int)$stmtId->fetchColumn();
     }
 
-    // 2. Delete old registrations for this student before re-registering
-    $stmtDel = $pdo->prepare('DELETE FROM registrations WHERE student_id = :sid');
-    $stmtDel->execute([':sid' => $studentId]);
+    // 2. Delete registrations that are no longer selected
+    $placeholders = str_repeat('?,', count($subjects) - 1) . '?';
+    $stmtDel = $pdo->prepare("DELETE FROM registrations WHERE student_id = ? AND subject_code NOT IN ($placeholders)");
+    $params = array_merge([$studentId], $subjects);
+    $stmtDel->execute($params);
 
     // 3. Insert each selected subject
     $stmtReg = $pdo->prepare(
