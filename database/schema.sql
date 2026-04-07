@@ -1,9 +1,9 @@
 -- ============================================================
 -- Resurgence Portal – Database Schema
 -- ============================================================
+-- CREATE DATABASE IF NOT EXISTS resurgence CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE resurgence;
 
-CREATE DATABASE IF NOT EXISTS resurgence CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE resurgence;
 
 -- ------------------------------------------------------------
 -- 1. departments

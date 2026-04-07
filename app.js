@@ -161,17 +161,21 @@ function validateStep1() {
 // ══════════════════════════════════════════════════════════════
 async function loadDepartments() {
     try {
+        // We fetch from the 'api' folder relative to index.html
         const res = await fetch('api/departments.php');
         const data = await res.json();
 
+        // Clear the "Loading..." message and add the default option
         els.inpDept.innerHTML = '<option value="">— Select Department —</option>';
+        
         data.forEach(dept => {
             const opt = document.createElement('option');
             opt.value = dept.id;
             opt.textContent = dept.dept_name;
             els.inpDept.appendChild(opt);
         });
-    } catch {
+    } catch (error) {
+        console.error('Error loading departments:', error);
         els.inpDept.innerHTML = '<option value="">Failed to load departments</option>';
     }
 }
@@ -180,7 +184,7 @@ async function loadDepartments() {
 // FETCH: SUBJECTS (called when entering step 2)
 // ══════════════════════════════════════════════════════════════
 async function loadSubjects(deptId, semester) {
-    // Show skeleton loaders
+    // Show skeleton loaders while waiting for the database
     els.subjectsGrid.innerHTML = Array(4).fill(0).map(() => `
     <div class="skeleton h-24 w-full rounded-xl"></div>
   `).join('');
@@ -188,12 +192,14 @@ async function loadSubjects(deptId, semester) {
     els.deptSubtitle.textContent = `Showing Semester ${semester} subjects for ${state.deptName}`;
 
     try {
+        // Fetches subjects filtered by Department and Semester
         const res = await fetch(`api/subjects.php?dept_id=${encodeURIComponent(deptId)}&semester=${encodeURIComponent(semester)}`);
         const data = await res.json();
 
         state.allSubjects = data;
         renderSubjectCards();
-    } catch {
+    } catch (error) {
+        console.error('Error loading subjects:', error);
         els.subjectsGrid.innerHTML = `
       <p class="col-span-2 text-center text-red-500 py-8">
         Failed to load subjects. Please go back and try again.
@@ -311,6 +317,7 @@ function renderSummary() {
 // POST: REGISTER
 // ══════════════════════════════════════════════════════════════
 async function submitRegistration() {
+    // Disable the button and show a loading spinner
     els.btnConfirm.disabled = true;
     els.btnConfirmLabel.textContent = 'Submitting…';
     els.btnConfirmIcon.innerHTML = `
@@ -328,24 +335,30 @@ async function submitRegistration() {
             subjects: [...state.selectedSubjects],
         };
 
+        // Send the student data to the backend
         const res = await fetch('api/register.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
+        
         const data = await res.json();
 
+        // If the server returns an error, jump to the catch block
         if (!res.ok || !data.success) {
             throw new Error(data.error ?? 'Registration failed.');
         }
 
+        // Save the generated Student ID and show the success screen
         state.studentId = data.student_id;
         showSuccess();
 
     } catch (err) {
+        // Show the error message to the user
         els.regError.textContent = err.message;
         els.regError.classList.remove('hidden');
     } finally {
+        // Reset the button state regardless of success or failure
         els.btnConfirm.disabled = false;
         els.btnConfirmLabel.textContent = 'Confirm Registration';
         els.btnConfirmIcon.innerHTML = `
@@ -445,19 +458,28 @@ function escapeHtml(str) {
 // EVENT LISTENERS
 // ══════════════════════════════════════════════════════════════
 
-// Step 1 → Step 2
+// Step 1 → Step 2: The "Gateway" to Subject Selection
 els.btnToStep2.addEventListener('click', async () => {
     if (!validateStep1()) return;
 
     goToStep(2);
-    // Only fetch subjects if department/semester/usn changed or not yet loaded
-    if (!state.allSubjects.length || state._lastDeptId !== state.deptId || state._lastSemester !== state.semester || state._lastUsn !== state.usn) {
+    
+    // Check if we actually need to fetch new data (if inputs changed)
+    const inputsChanged = state._lastDeptId !== state.deptId || 
+                          state._lastSemester !== state.semester || 
+                          state._lastUsn !== state.usn;
+
+    if (!state.allSubjects.length || inputsChanged) {
+        // Update tracking variables
         state._lastDeptId = state.deptId;
         state._lastSemester = state.semester;
         state._lastUsn = state.usn;
+        
+        // Clear current selections to avoid mixing data from different USNs
         state.selectedSubjects.clear();
         
         try {
+            // 1. Fetch any existing registrations for this USN from Aiven
             const regRes = await fetch(`api/student_registrations.php?usn=${encodeURIComponent(state.usn)}`);
             if (regRes.ok) {
                 const regData = await regRes.json();
@@ -466,9 +488,10 @@ els.btnToStep2.addEventListener('click', async () => {
                 }
             }
         } catch (e) {
-            console.error('Failed to load previous registrations', e);
+            console.error('Migration Note: Could not reach Aiven for pre-fill data', e);
         }
         
+        // 2. Update the UI and load the actual subject cards
         updateBadge();
         await loadSubjects(state.deptId, state.semester);
     }
@@ -477,7 +500,7 @@ els.btnToStep2.addEventListener('click', async () => {
 // Step 2 → Back to Step 1
 els.btnBack1.addEventListener('click', () => goToStep(1));
 
-// Step 2 → Step 3
+// Step 2 → Step 3: Review Page
 els.btnToStep3.addEventListener('click', () => {
     if (state.selectedSubjects.size === 0) {
         els.errSubjects.classList.remove('hidden');
@@ -490,13 +513,13 @@ els.btnToStep3.addEventListener('click', () => {
 // Step 3 → Back to Step 2
 els.btnBack2.addEventListener('click', () => {
     goToStep(2);
-    renderSubjectCards(); // Restore card states
+    renderSubjectCards(); 
 });
 
 // Confirm submission
 els.btnConfirm.addEventListener('click', submitRegistration);
 
-// New registration
+// New registration (Reset the whole wizard)
 els.btnNewReg.addEventListener('click', resetWizard);
 
 // Auto-clear field errors on input change
@@ -506,9 +529,11 @@ els.inpSemester.addEventListener('change', () => els.errSemester.classList.add('
 els.inpDept.addEventListener('change', () => els.errDept.classList.add('hidden'));
 
 // ══════════════════════════════════════════════════════════════
-// INIT
+// INIT: The Start Point
 // ══════════════════════════════════════════════════════════════
 (async function init() {
+    // Set the initial UI state
     goToStep(1);
+    // Fetch departments from Aiven immediately so the dropdown is ready
     await loadDepartments();
 })();
