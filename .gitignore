@@ -4,6 +4,14 @@ api/env.ini
 # Ignore database tools
 database/backup/
 
+# Ignore database setup/destructive scripts
+api/init_db.php
+api/seed_db.php
+
+# Ignore SSL certificates
+certs/
+*.pem
+
 # Mac system files
 .DS_Store
 
